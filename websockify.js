@@ -1,21 +1,21 @@
-var WebSocket = Npm.require('faye-websocket'),
-    http      = Npm.require('http');
+var WebSocket = Npm.require('faye-websocket');
 
-var server = http.createServer();
-
-server.on('upgrade', function(request, socket, body) {
-  if (WebSocket.isWebSocket(request)) {
-    var ws = new WebSocket(request, socket, body);
-
-    ws.on('message', function(event) {
-      ws.send(event.data);
-    });
-
-    ws.on('close', function(event) {
-      console.log('close', event.code, event.reason);
-      ws = null;
-    });
+Package.webapp.WebApp.httpServer.on('upgrade', function(request, socket, body) {
+  var prefix = "/websockify"
+  if (request.url.substring(0, prefix.length) !== prefix) {
+    return;
   }
-});
+  if (!WebSocket.isWebSocket(request)) {
+    return;
+  }
 
-server.listen(8000);
+  var ws = new WebSocket(request, socket, body);
+
+  ws.on('message', function(event) {
+    ws.send(event.data);
+  });
+
+  ws.on('close', function(event) {
+    ws = null;
+  });
+});
