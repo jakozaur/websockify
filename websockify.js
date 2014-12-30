@@ -1,6 +1,6 @@
 var WebSocket = Npm.require('faye-websocket');
 
-WebSocketServer = function (prefix) {
+WebSocketServer = function (prefix, ClientHandler) {
   var self = this;
   if (! (self instanceof WebSocketServer))
     throw new Error("use 'new' to construct a WebSocketServer");
@@ -19,14 +19,12 @@ WebSocketServer = function (prefix) {
 
     openSockets.push(ws);
 
-    ws.on('message', function(event) {
-      ws.send(event.data);
-    });
-
     ws.on('close', function(event) {
       openSockets = _.without(self.openSockets, ws);
       ws = null;
     });
+
+    new ClientHandler(ws);
   };
 
   var onClose = function () {
