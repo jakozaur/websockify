@@ -1,4 +1,6 @@
+
 Tinytest.addAsync("echo service works", function (test, next) {
+  var server = new WebSocketServer('/websockify');
   var WebSocket = Npm.require('faye-websocket');
   var ws        = new WebSocket.Client(Meteor.absoluteUrl('websockify'));
 
@@ -19,16 +21,19 @@ Tinytest.addAsync("echo service works", function (test, next) {
     ws = null;
     test.equal(event.code, 1000);
     test.equal(wasMessage, true);
+    server.close();
     next();
   }));
 });
 
 Tinytest.addAsync("can connect only to specfic url", function (test, next) {
+  var server = new WebSocketServer('/websockify');
   var WebSocket = Npm.require('faye-websocket');
   var ws        = new WebSocket.Client(Meteor.absoluteUrl('some-random'));
 
   ws.on('close', Meteor.bindEnvironment(function (event) {
     test.equal(event.code, 1006);
+    server.close();
     next();
   }));
 });
