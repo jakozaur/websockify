@@ -12,8 +12,9 @@ Npm.depends({
 Package.onUse(function(api) {
   api.versionsFrom('1.0.2.1');
   api.use(['webapp', 'routepolicy'], 'server');
-  api.addFiles('websockify.js', 'server');
-  api.export('WebSocketServer')
+  api.addFiles(['websocket-server.js', 'websockify.js'], 'server');
+  api.export('WebSocketServer');
+  api.export('WebSockifyServer');
 });
 
 Package.onTest(function(api) {

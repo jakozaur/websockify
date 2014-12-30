@@ -1,5 +1,5 @@
 
-var EchoService = function (ws) {
+var EchoService = function (url, ws) {
   ws.on('message', function(event) {
     ws.send(event.data);
   });
