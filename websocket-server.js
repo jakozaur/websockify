@@ -7,15 +7,24 @@ WebSocketServer = function (prefix, ClientHandler) {
 
   var openSockets = [];
 
+  var httpServer = Package.webapp.WebApp.httpServer;
+  var oldUpdateListeners = httpServer.listeners('upgrade').slice(0);
+  httpServer.removeAllListeners('upgrade');
+
   var onUpgrade = function(request, socket, body) {
     if (request.url.substring(0, prefix.length) !== prefix) {
+      // Call regular websocket
+      var args = arguments;
+      _.each(oldUpdateListeners, function (listener) {
+        listener.apply(httpServer, args);
+      })
       return;
     }
     if (!WebSocket.isWebSocket(request)) {
       return;
     }
 
-    var ws = new WebSocket(request, socket, body);
+    var ws = new WebSocket(request, socket, body, ['binary', 'base64']);
 
     openSockets.push(ws);
 
@@ -24,7 +33,7 @@ WebSocketServer = function (prefix, ClientHandler) {
       ws = null;
     });
 
-    new ClientHandler(request.url.substring(prefix.length), ws);
+    new ClientHandler(request.url.substr(prefix.length), ws);
   };
 
   var onClose = function () {
@@ -34,12 +43,15 @@ WebSocketServer = function (prefix, ClientHandler) {
   };
 
   // Setup listeners
-  Package.webapp.WebApp.httpServer.on('upgrade', onUpgrade);
-  Package.webapp.WebApp.httpServer.on('meteor-closing', onClose);
+  httpServer.on('upgrade', onUpgrade);
+  httpServer.on('meteor-closing', onClose);
 
   self.close = function () {
-    Package.webapp.WebApp.httpServer.removeListener('upgrade', onUpgrade);
-    Package.webapp.WebApp.httpServer.removeListener('meteor-closing', onClose);
+    httpServer.removeListener('upgrade', onUpgrade);
+    _.each(oldUpdateListeners, function (listener) {
+      httpServer.on('upgrade', listener);
+    });
+    httpServer.removeListener('meteor-closing', onClose);
     onClose();
   }
 }

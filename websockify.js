@@ -1,14 +1,18 @@
 var Net = Npm.require('net');
 var Buffer = Npm.require('buffer').Buffer;
 
-WebSockifyServer = function () {
+WebSockifyServer = function (options) {
   var self = this;
+  if (! (self instanceof WebSockifyServer))
+    throw new Error("use 'new' to construct a WebSockifyServer");
+
+  var log = options && options.debug && console.log || function (){};
 
   var ProxyHandler = function (url, ws) {
-    console.log("Client connect, url = ", url, "ws = ", ws);
+    log("Client connect, url = ", url, "ws = ", ws);
 
     var tcp = Net.createConnection(5555, '192.168.59.103', function() {
-      console.log('Connected to VNC target');
+      log('Connected to VNC target');
     });
 
     tcp.on('data', function (data) {
@@ -19,32 +23,32 @@ WebSockifyServer = function () {
           ws.send(data);
         }
       } catch (e) {
-        console.log("WebSocket was closed ", e);
-        tcp.close();
+        log("WebSocket was closed ", e);
+        tcp.end();
       }
     });
 
     tcp.on('end', function () {
-      console.log("Tcp closed connection");
+      log("Tcp closed connection");
       ws.close();
     });
 
-    ws.on('message', function (data) {
-      if (client.protocol === 'base64') {
-        tcp.write(new Buffer(msg, 'base64'));
+    ws.on('message', function (msg) {
+      if (ws.protocol === 'base64') {
+        tcp.write(new Buffer(msg.data, 'base64'));
       } else {
-        tcp.write(msg, 'binary');
+        tcp.write(msg.data, 'binary');
       }
     });
 
     ws.on('close', function () {
-      console.log("Web socket close connection");
-      tcp.close();
+      log("Web socket close connection");
+      tcp.end();
     });
 
     var onError = function (msg) {
-      console.log("Unexpected error", msg);
-      tcp.close();
+      log("Unexpected error", msg);
+      tcp.end();
       ws.close();
     };
 
@@ -52,7 +56,7 @@ WebSockifyServer = function () {
     ws.on('error', onError);
   }
 
-  var server = WebSocketServer('/websockify', ProxyHandler);
+  var server = new WebSocketServer('/websockify', ProxyHandler);
 
   self.close = function () {
     server.close();

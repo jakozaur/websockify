@@ -1,5 +1,5 @@
 Package.describe({
-  name: 'websockify',
+  name: 'jakozaur:websockify',
   summary: ' /* Fill me in! */ ',
   version: '1.0.0',
   git: ' /* Fill me in! */ '
@@ -11,7 +11,7 @@ Npm.depends({
 
 Package.onUse(function(api) {
   api.versionsFrom('1.0.2.1');
-  api.use(['webapp', 'routepolicy'], 'server');
+  api.use(['webapp'], 'server');
   api.addFiles(['websocket-server.js', 'websockify.js'], 'server');
   api.export('WebSocketServer');
   api.export('WebSockifyServer');
@@ -19,6 +19,6 @@ Package.onUse(function(api) {
 
 Package.onTest(function(api) {
   api.use('tinytest');
-  api.use('websockify');
+  api.use('jakozaur:websockify');
   api.addFiles('websockify-tests.js', 'server');
 });
