@@ -1,8 +1,8 @@
 Package.describe({
   name: 'jakozaur:websockify',
-  summary: ' /* Fill me in! */ ',
-  version: '1.0.0',
-  git: ' /* Fill me in! */ '
+  summary: 'Proxy WebSocket from client to any TCP connection on server',
+  version: '0.1.0',
+  git: 'https://github.com/jakozaur/websockify'
 });
 
 Npm.depends({
@@ -12,7 +12,7 @@ Npm.depends({
 Package.onUse(function(api) {
   api.versionsFrom('1.0.2.1');
   api.use(['webapp'], 'server');
-  api.addFiles(['websocket-server.js', 'websockify.js'], 'server');
+  api.addFiles(['websocket-server.js', 'websockify-server.js'], 'server');
   api.export('WebSocketServer');
   api.export('WebSockifyServer');
 });

@@ -1,5 +1,6 @@
 var WebSocket = Npm.require('faye-websocket');
 
+// Allows `ClientHandler` to receive WebSocket connections at '/prefix*
 WebSocketServer = function (prefix, ClientHandler) {
   var self = this;
   if (! (self instanceof WebSocketServer))

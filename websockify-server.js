@@ -1,7 +1,9 @@
 var Net = Npm.require('net');
 var Buffer = Npm.require('buffer').Buffer;
 
-WebSockifyServer = function (options) {
+// A proxy from WebSocket to TCP
+// Browser can connect at '/websockify*'
+WebSockifyServer = function (findProxyDestination, options) {
   var self = this;
   if (! (self instanceof WebSockifyServer))
     throw new Error("use 'new' to construct a WebSockifyServer");
@@ -11,7 +13,17 @@ WebSockifyServer = function (options) {
   var ProxyHandler = function (url, ws) {
     log("Client connect, url = ", url, "ws = ", ws);
 
-    var tcp = Net.createConnection(5555, '192.168.59.103', function() {
+    var dest = findProxyDestination(url);
+
+    if (!dest) {
+      log("No destination, closing web socket");
+      ws.close();
+      return;
+    } else {
+      log("Connecting to port", dest.port, " on host ", dest.host);
+    }
+
+    var tcp = Net.createConnection(dest.port, dest.host, function() {
       log('Connected to VNC target');
     });
 
